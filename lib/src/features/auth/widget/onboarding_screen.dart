@@ -64,9 +64,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   children: [
                     Assets.images.logo.image(),
                     TitleWithDescriptionWidget(
-                      title: 'Тестируй. Обучай. Расти.',
+                      title: 'Стихи в ритме вдохновения',
                       description:
-                          'Создавай тесты для обучения или оценки, проходи викторины, анализируй результаты и делись знаниями. Подходит для преподавателей, команд и всех, кто хочет расти вместе с другими!',
+                          'Погрузись в атмосферу вдохновения — пиши стихи под звуки фоновой музыки. Делись своими произведениями и находи единомышленников в сообществе поэтов.',
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
