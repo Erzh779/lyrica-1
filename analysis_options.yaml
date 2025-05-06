@@ -1,0 +1,7 @@
+include: lints.yaml
+
+dart_code_metrics:
+  extends: dcm.yaml
+
+  metrics:
+    cyclomatic-complexity: 20

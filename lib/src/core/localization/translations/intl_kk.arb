@@ -1,0 +1,22 @@
+{
+  "@@locale": "kk",
+  "cheTam": "Не болды?",
+  "errorInvalidFormat": "Жарамсыз формат",
+  "errorTimeoutExceeded": "Уақыт шектен асырылды",
+  "errorUnimplementedError": "Орындалмады",
+  "errorUnsupportedError": "Қолдау көрсетілмейді",
+  "errorFileSystemError": "Файл жүйесінде қате",
+  "errorAssertionError": "Қателік",
+  "errorUnknownError": "Белгісіз қате",
+  "errorBadInternetConnection": "Ғаламтор байланысы нашар",
+  "errorConnectionException": "Қосылым байланысы нашар",
+  "errorDownloadCancelled": "Жүктелу тоқтатылды",
+  "errorUploadCancelled": "Жүктелу тоқтатылды",
+  "errorInvalidCredentials": "Жарамсыз кіру мәліметтері",
+  "errorEmailNotConfirmed": "Электрондық пошта расталмады",
+  "homeTabsTests": "Тесттер",
+  "homeTabsResults": "Нәтижелер",
+  "homeTabsCohorts": "Когорттар",
+  "homeTabsNotifications": "Хабарландырулар",
+  "homeTabsProfile": "Профиль"
+}

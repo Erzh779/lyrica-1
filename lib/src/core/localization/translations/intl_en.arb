@@ -1,0 +1,22 @@
+{
+  "@@locale": "en",
+  "cheTam": "What's up?",
+  "errorInvalidFormat": "Invalid format",
+  "errorTimeoutExceeded": "Timeout exceeded",
+  "errorUnimplementedError": "Unimplemented operation",
+  "errorUnsupportedError": "Unsupported operation",
+  "errorFileSystemError": "File system error",
+  "errorAssertionError": "Assertion error",
+  "errorUnknownError": "Unknown error",
+  "errorBadInternetConnection": "Bad internet connection",
+  "errorConnectionException": "Unstable connection",
+  "errorDownloadCancelled": "Download cancelled",
+  "errorUploadCancelled": "Upload cancelled",
+  "errorInvalidCredentials": "Invalid credentials",
+  "errorEmailNotConfirmed": "Email not confirmed",
+  "homeTabsTests": "Tests",
+  "homeTabsResults": "Results",
+  "homeTabsCohorts": "Cohorts",
+  "homeTabsNotifications": "Notifications",
+  "homeTabsProfile": "Profile"
+}

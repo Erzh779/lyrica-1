@@ -1,0 +1,22 @@
+{
+    "@@locale": "ru",
+    "cheTam": "Че там?",
+    "errorInvalidFormat": "Неверный формат",
+    "errorTimeoutExceeded": "Превышено время ожидания",
+    "errorUnimplementedError": "Операция не выполнена",
+    "errorUnsupportedError": "Операция не поддерживается",
+    "errorFileSystemError": "Ошибка файловой системы",
+    "errorAssertionError": "Ошибка утверждения",
+    "errorUnknownError": "Неизвестная ошибка",
+    "errorBadInternetConnection": "Плохое интернет-соединение",
+    "errorConnectionException": "Нестабильное соединение",
+    "errorDownloadCancelled": "Загрузка отменена",
+    "errorUploadCancelled": "Загрузка отменена",
+    "errorInvalidCredentials": "Неверные учетные данные",
+    "errorEmailNotConfirmed": "Электронная почта не подтверждена",
+    "homeTabsTests": "Тесты",
+    "homeTabsResults": "Результаты",
+    "homeTabsCohorts": "Когорты",
+    "homeTabsNotifications": "Уведомления",
+    "homeTabsProfile": "Профиль"
+}

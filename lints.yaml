@@ -1,0 +1,97 @@
+analyzer:
+  # Exclude files from analysis. Must be relative to the root of the package.
+  exclude:
+    - "build/**"
+    - "test/**.mocks.dart"
+    - ".test_coverage.dart"
+    - "coverage/**"
+    - "assets/**"
+    - "lib/src/core/localization/generated/**"
+    - "lib/src/core/constants/pubspec.yaml.g.dart"
+    - "lib/src/core/model/generated/**"
+    - "**.g.dart"
+    - "**.gql.dart"
+    - "**.freezed.dart"
+    - "**.config.dart"
+    - "**.mocks.dart"
+    - "**.gen.dart"
+    - "**.pb.dart"
+    - "**.pbenum.dart"
+    - "**.pbjson.dart"
+    - ".fvm/**"
+    - "scripts/**"
+    - ".dart_tool/**"
+    - "ios/**"
+    - "android/**"
+    - "web/**"
+    - "macos/**"
+    - "windows/**"
+    - "linux/**"
+
+  # Enable the following options to enable strong mode.
+  language:
+    strict-casts: true
+    strict-raw-types: true
+    strict-inference: true
+
+  # Enable the following options to enable new language features.
+  enable-experiment:
+    - macros
+    - const-functions
+    - variance
+
+  errors:
+    # Info
+    directives_ordering: info
+    always_declare_return_types: info
+
+    # Warning
+    unsafe_html: warning
+    no_logic_in_create_state: warning
+    empty_catches: warning
+    close_sinks: warning
+
+    # Error
+    avoid_relative_lib_imports: error
+    avoid_slow_async_io: error
+    avoid_types_as_parameter_names: error
+    cancel_subscriptions: error
+    valid_regexps: error
+    always_require_non_null_named_parameters: error
+    avoid_dynamic_calls: ignore
+    # always_use_package_imports: error
+    # prefer_double_quotes: error
+
+linter:
+  rules:
+    - always_declare_return_types
+    - always_put_required_named_parameters_first
+    - always_use_package_imports
+    - avoid_bool_literals_in_conditional_expressions
+    - avoid_double_and_int_checks
+    - avoid_dynamic_calls
+    - avoid_empty_else
+    - avoid_field_initializers_in_const_classes
+    - avoid_init_to_null
+    - avoid_null_checks_in_equality_operators
+    - avoid_print
+    - avoid_private_typedef_functions
+    - avoid_redundant_argument_values
+    - avoid_relative_lib_imports
+    - avoid_renaming_method_parameters
+    - avoid_returning_null_for_void
+    - prefer_single_quotes
+    - non_constant_identifier_names
+    - avoid_return_types_on_setters
+    - avoid_returning_this
+    - avoid_shadowing_type_parameters
+    - avoid_single_cascade_in_expression_statements
+    - avoid_slow_async_io
+    - avoid_type_to_string
+    - dangling_library_doc_comments
+    - missing_code_block_language_in_doc_comment
+    - package_api_docs
+    - public_member_api_docs
+    - slash_for_doc_comments
+    
+    # prefer_double_quotes: true
