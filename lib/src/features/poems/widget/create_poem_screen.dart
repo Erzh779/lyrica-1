@@ -16,6 +16,7 @@ import 'package:poem/src/features/poems/controller/create_poem_controller.dart';
 import 'package:poem/src/features/poems/model/create_poem_data.dart';
 import 'package:poem/src/features/poems/widget/create_poem_settings_bottom_modal_sheet.dart';
 import 'package:poem/src/features/poems/widget/select_font_bottom_modal_sheet.dart';
+import 'package:poem/src/features/poems/widget/speech_to_text_dialog.dart';
 
 /// {@template create_poem_screen}
 /// CreatePoemScreen widget.
@@ -66,10 +67,20 @@ class _CreatePoemScreenState extends State<CreatePoemScreen>
                 StateControllerProcessingBuilder(
                   stateController: _createPoemController,
                   isProcessing: (state) => state.isProcessing,
-                  builder: (context, isProcessing) => TextButton(
+                  builder: (context, isProcessing) => IconButton(
                     onPressed: isProcessing ? null : _onPressSave,
-                    child: const Text(
-                      'Save',
+                    icon: const Icon(
+                      Icons.save,
+                    ),
+                  ),
+                ),
+                StateControllerProcessingBuilder(
+                  stateController: _createPoemController,
+                  isProcessing: (state) => state.isProcessing,
+                  builder: (context, isProcessing) => IconButton(
+                    onPressed: isProcessing ? null : _onPresMic,
+                    icon: const Icon(
+                      Icons.mic,
                     ),
                   ),
                 ),
@@ -289,6 +300,27 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
     if (!mounted) return;
 
     _image.value = file;
+  }
+
+  Future<void> _onPresMic() async {
+    final transcription = await SpeechToTextDialog.show(
+      context,
+      content: _contentController.text,
+    );
+
+    if (transcription == null) return;
+
+    if (!mounted) return;
+
+    final sb = StringBuffer();
+
+    sb.write(_contentController.text);
+    if (sb.isNotEmpty) sb.write('\n');
+    sb.write(transcription);
+
+    _contentController.text = sb.toString();
+
+    _contentFocusNode.requestFocus();
   }
 
   @override
