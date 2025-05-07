@@ -100,6 +100,41 @@ final class PoemsController extends StateController<PoemsState>
           ),
         ),
       );
+
+  /// Delete a poem.
+  void deletePoem(Poem poem) => handle(
+        name: 'DeletePoem',
+        () async {
+          setState(
+            PoemsState.processing(
+              poems: state.poems,
+              message: 'Deleting poem...',
+            ),
+          );
+
+          final poems = state.poems.where((p) => p.id != poem.id).toList();
+
+          setState(
+            PoemsState.succeeded(
+              poems: poems,
+              message: 'Poem deleted successfully! Count: ${poems.length}',
+            ),
+          );
+        },
+        error: (error, stackTrace) async => setState(
+          PoemsState.failed(
+            poems: state.poems,
+            message: ErrorUtil.formatMessage(
+              error,
+            ),
+          ),
+        ),
+        done: () async => setState(
+          PoemsState.idle(
+            poems: state.poems,
+          ),
+        ),
+      );
 }
 
 /// {@template poems_state}

@@ -134,8 +134,13 @@ class PoemsRepository$Supabase implements IPoemsRepository {
 
   @override
   Future<List<Poem>> queryPoems() async {
-    final response =
-        await _poems.select().order('created_at', ascending: false);
+    final userId = _client.auth.currentUser!.id;
+
+    final response = await _poems
+        .select()
+        .eq('author_id', userId)
+        .order('created_at', ascending: false);
+
     final poems = (response as List)
         .map((e) => Poem.fromJson(e as Map<String, Object?>))
         .toList();
