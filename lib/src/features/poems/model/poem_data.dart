@@ -8,7 +8,7 @@ import 'package:poem/src/features/music/model/music.dart';
 /// its title, content, and optional metadata such as cover image, audio file,
 /// and font family.
 /// {@endtemplate}
-class CreatePoemData {
+class PoemData {
   /// The title of the poem.
   final String title;
 
@@ -18,6 +18,10 @@ class CreatePoemData {
   /// An optional path to the cover image of the poem.
   final String? cover;
 
+  /// An optional path to the original cover image of the poem.
+  /// This is used to identify the original cover image when updating the poem.
+  final String? originalCover;
+
   /// An optional path to the audio file associated with the poem.
   final Music? music;
 
@@ -25,62 +29,65 @@ class CreatePoemData {
   final String? fontFamily;
 
   /// {@macro poem_data}
-  const CreatePoemData({
+  const PoemData({
     required this.title,
     required this.content,
     this.cover,
+    this.originalCover,
     this.music,
     this.fontFamily,
   });
 
-  /// Creates a copy of this [CreatePoemData] with optional new values.
-  CreatePoemData copyWith({
+  /// Creates a copy of this [PoemData] with optional new values.
+  PoemData copyWith({
     String? title,
     String? content,
-    String? cover,
+    String? Function()? cover,
+    String? Function()? originalCover,
     Music? Function()? music,
-    String? fontFamily,
+    String? Function()? fontFamily,
   }) =>
-      CreatePoemData(
+      PoemData(
         title: title ?? this.title,
         content: content ?? this.content,
-        cover: cover ?? this.cover,
+        cover: cover != null ? cover() : this.cover,
         music: music != null ? music() : this.music,
-        fontFamily: fontFamily ?? this.fontFamily,
+        fontFamily: fontFamily != null ? fontFamily() : this.fontFamily,
       );
 
-  /// Converts a JSON map into a [CreatePoemData] instance.
-  factory CreatePoemData.fromJson(Map<String, Object?> json) => CreatePoemData(
+  /// Converts a JSON map into a [PoemData] instance.
+  factory PoemData.fromJson(Map<String, Object?> json) => PoemData(
         title: json['title'] as String,
         content: json['content'] as String,
         cover: json['cover'] as String?,
-        music: json['music'] != null
-            ? Music.fromJson(json['music'] as Map<String, Object?>)
-            : null,
+        originalCover: json['originalCover'] as String?,
+        music: json['music'] != null ? Music.fromJson(json['music'] as Map<String, Object?>) : null,
         fontFamily: json['fontFamily'] as String?,
       );
 
-  /// Converts this [CreatePoemData] instance into a JSON map.
+  /// Converts this [PoemData] instance into a JSON map.
   Map<String, Object?> toJson() => {
         'title': title,
         'content': content,
         'cover': cover,
+        'originalCover': originalCover,
         'music': music?.toJson(),
         'fontFamily': fontFamily,
       };
 
   @override
   String toString() =>
-      'PoemData(title: $title, content: $content, cover: $cover, music: $music, fontFamily: $fontFamily)';
+      'PoemData(title: $title, content: $content, cover: $cover, originalCover: $originalCover, music: $music, fontFamily: $fontFamily)';
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is CreatePoemData &&
+    return other is PoemData &&
         other.title == title &&
         other.content == content &&
         other.cover == cover &&
+        other.originalCover == originalCover &&
         other.music == music &&
         other.fontFamily == fontFamily;
   }
@@ -90,6 +97,7 @@ class CreatePoemData {
         title,
         content,
         cover,
+        originalCover,
         music,
         fontFamily,
       );

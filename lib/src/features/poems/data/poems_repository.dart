@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:poem/src/features/music/model/music.dart';
-import 'package:poem/src/features/poems/model/create_poem_data.dart';
 import 'package:poem/src/features/poems/model/poem.dart';
+import 'package:poem/src/features/poems/model/poem_data.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -30,22 +30,22 @@ abstract interface class IPoemsRepository {
 
   /// Creates a new poem in the repository.
   ///
-  /// [poem] - The data required to create a new poem, encapsulated in a [CreatePoemData] object.
+  /// [poem] - The data required to create a new poem, encapsulated in a [PoemData] object.
   ///
   /// Returns a [Future] that completes with the newly created [Poem] object.
   Future<Poem> createPoem(
-    CreatePoemData poem,
+    PoemData poem,
   );
 
   /// Updates an existing poem in the repository.
   ///
   /// [poem] - The existing [Poem] object to update.
-  /// [data] - The new data to update the poem with, encapsulated in a [CreatePoemData] object.
+  /// [data] - The new data to update the poem with, encapsulated in a [PoemData] object.
   ///
   /// Returns a [Future] that completes with the updated [Poem] object.
   Future<Poem> updatePoem(
     Poem poem,
-    CreatePoemData data,
+    PoemData data,
   );
 
   /// Deletes a poem from the repository.
@@ -87,7 +87,7 @@ class PoemsRepository$Supabase implements IPoemsRepository {
 
   @override
   Future<Poem> createPoem(
-    CreatePoemData poem,
+    PoemData poem,
   ) async {
     try {
       // upload cover image if provided
@@ -160,12 +160,12 @@ class PoemsRepository$Supabase implements IPoemsRepository {
   @override
   Future<Poem> updatePoem(
     Poem poem,
-    CreatePoemData data,
+    PoemData data,
   ) async {
     try {
-      // upload cover image if provided
-      String? coverUrl;
+      String? coverUrl = data.originalCover;
 
+      // upload cover image if provided
       if (data.cover != null) {
         final file = File(data.cover!);
         coverUrl = await _uploadFile('images', file);

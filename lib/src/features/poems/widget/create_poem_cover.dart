@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 /// {@template create_poem_cover}
@@ -10,6 +11,7 @@ class CreatePoemCover extends StatelessWidget {
   const CreatePoemCover({
     this.enabled = true,
     this.imagePath,
+    this.imageUrl,
     this.onRemove,
     super.key, // ignore: unused_element
   });
@@ -19,6 +21,9 @@ class CreatePoemCover extends StatelessWidget {
 
   /// Path to the image.
   final String? imagePath;
+
+  /// URL to the image.
+  final String? imageUrl;
 
   /// Callback when the remove button is pressed.
   final VoidCallback? onRemove;
@@ -33,15 +38,20 @@ class CreatePoemCover extends StatelessWidget {
             child: child,
           ),
         ),
-        child: imagePath != null
+        child: imagePath != null || imageUrl != null
             ? Stack(
                 children: [
                   AspectRatio(
                     aspectRatio: 16 / 9,
-                    child: Image.file(
-                      File(imagePath!),
-                      fit: BoxFit.cover,
-                    ),
+                    child: imagePath != null
+                        ? Image.file(
+                            File(imagePath!),
+                            fit: BoxFit.cover,
+                          )
+                        : CachedNetworkImage(
+                            imageUrl: imageUrl!,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                   Positioned(
                     top: 8,

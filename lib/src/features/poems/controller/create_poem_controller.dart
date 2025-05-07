@@ -1,8 +1,8 @@
 import 'package:control/control.dart';
 import 'package:meta/meta.dart';
 import 'package:poem/src/features/poems/data/poems_repository.dart';
-import 'package:poem/src/features/poems/model/create_poem_data.dart';
 import 'package:poem/src/features/poems/model/poem.dart';
+import 'package:poem/src/features/poems/model/poem_data.dart';
 
 /// {@template create_poem_controller}
 /// A controller responsible for managing the state and behavior of creating a poem.
@@ -15,8 +15,7 @@ import 'package:poem/src/features/poems/model/poem.dart';
 ///
 /// {@endtemplate}
 
-final class CreatePoemController extends StateController<CreatePoemState>
-    with SequentialControllerHandler {
+final class CreatePoemController extends StateController<CreatePoemState> with SequentialControllerHandler {
   /// {@macro create_poem_controller}
   ///   - Requires an [IPoemsRepository] instance to handle poem-related operations.
   ///   - Requires an initial state of type [CreatePoemState].
@@ -27,7 +26,7 @@ final class CreatePoemController extends StateController<CreatePoemState>
 
   final IPoemsRepository _repository;
 
-  /// Accepts a [CreatePoemData] object containing the data for the poem to be created.
+  /// Accepts a [PoemData] object containing the data for the poem to be created.
   ///   - Handles the poem creation process by:
   ///     - Setting the state to `processing` with a message indicating the operation.
   ///     - Calling the repository's `createPoem` method to create the poem.
@@ -36,7 +35,7 @@ final class CreatePoemController extends StateController<CreatePoemState>
   ///     - Updating the state to `failed` with an error message if an error occurs.
   ///     - Resetting the state to `idle` once the operation is complete.
   void submit(
-    CreatePoemData data,
+    PoemData data,
   ) =>
       handle(
         name: 'Submit',
@@ -165,8 +164,7 @@ final class CreatePoemState$Failed extends CreatePoemState {
 }
 
 /// Pattern matching for [CreatePoemState].
-typedef CreatePoemStateMatch<R, S extends CreatePoemState> = R Function(
-    S element);
+typedef CreatePoemStateMatch<R, S extends CreatePoemState> = R Function(S element);
 
 @immutable
 abstract base class _$CreatePoemStateBase {
@@ -246,11 +244,7 @@ abstract base class _$CreatePoemStateBase {
   int get hashCode => Object.hash(type, poem);
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is _$CreatePoemStateBase &&
-          type == other.type &&
-          identical(poem, other.poem));
+  bool operator ==(Object other) => identical(this, other) || (other is _$CreatePoemStateBase && type == other.type && identical(poem, other.poem));
 
   @override
   String toString() => 'CreatePoemState.$type{message: $message}';

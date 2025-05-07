@@ -13,7 +13,7 @@ import 'package:poem/src/features/music/model/music.dart';
 import 'package:poem/src/features/music/widget/background_music_screen.dart';
 import 'package:poem/src/features/music/widget/selected_music_widget.dart';
 import 'package:poem/src/features/poems/controller/create_poem_controller.dart';
-import 'package:poem/src/features/poems/model/create_poem_data.dart';
+import 'package:poem/src/features/poems/model/poem_data.dart';
 import 'package:poem/src/features/poems/widget/create_poem_cover.dart';
 import 'package:poem/src/features/poems/widget/create_poem_settings_bottom_modal_sheet.dart';
 import 'package:poem/src/features/poems/widget/select_font_bottom_modal_sheet.dart';
@@ -243,7 +243,7 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
     if (content.isEmpty) return;
 
     _createPoemController.submit(
-      CreatePoemData(
+      PoemData(
         title: text,
         content: content,
         music: _music.value,

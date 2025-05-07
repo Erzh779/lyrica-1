@@ -1,8 +1,8 @@
 import 'package:control/control.dart';
 import 'package:meta/meta.dart';
 import 'package:poem/src/features/poems/data/poems_repository.dart';
-import 'package:poem/src/features/poems/model/create_poem_data.dart';
 import 'package:poem/src/features/poems/model/poem.dart';
+import 'package:poem/src/features/poems/model/poem_data.dart';
 
 final class UpdatePoemController extends StateController<UpdatePoemState> with SequentialControllerHandler {
   UpdatePoemController({
@@ -14,7 +14,7 @@ final class UpdatePoemController extends StateController<UpdatePoemState> with S
 
   /// Update a poem.
   void updatePoem({
-    required CreatePoemData data,
+    required PoemData data,
   }) =>
       handle(
         name: 'UpdatePoem',

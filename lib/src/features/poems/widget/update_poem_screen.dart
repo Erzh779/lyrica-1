@@ -12,8 +12,9 @@ import 'package:poem/src/features/music/model/music.dart';
 import 'package:poem/src/features/music/widget/background_music_screen.dart';
 import 'package:poem/src/features/music/widget/selected_music_widget.dart';
 import 'package:poem/src/features/poems/controller/update_poem_controller.dart';
-import 'package:poem/src/features/poems/model/create_poem_data.dart';
 import 'package:poem/src/features/poems/model/poem.dart';
+import 'package:poem/src/features/poems/model/poem_data.dart';
+import 'package:poem/src/features/poems/widget/create_poem_cover.dart';
 import 'package:poem/src/features/poems/widget/create_poem_settings_bottom_modal_sheet.dart';
 import 'package:poem/src/features/poems/widget/select_font_bottom_modal_sheet.dart';
 import 'package:poem/src/features/poems/widget/speech_to_text_dialog.dart';
@@ -46,7 +47,7 @@ class _UpdatePoemScreenState extends State<UpdatePoemScreen> with _UpdatePoemScr
           canPop: !isProcessing,
           child: Scaffold(
             appBar: AppBar(
-              title: const Text('Create Poem'),
+              title: const Text('Update Poem'),
               centerTitle: false,
               actions: [
                 StateControllerProcessingBuilder(
@@ -81,7 +82,7 @@ class _UpdatePoemScreenState extends State<UpdatePoemScreen> with _UpdatePoemScr
                   stateController: _updatePoemController,
                   isProcessing: (state) => state.isProcessing,
                   builder: (context, isProcessing) => IconButton(
-                    onPressed: isProcessing ? null : _onPresMic,
+                    onPressed: isProcessing ? null : _onPressMic,
                     icon: const Icon(
                       Icons.mic,
                     ),
@@ -96,19 +97,22 @@ class _UpdatePoemScreenState extends State<UpdatePoemScreen> with _UpdatePoemScr
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ValueListenableBuilder(
-                    valueListenable: _localImage,
-                    builder: (context, image, _) {
-                      if (image == null) return const SizedBox.shrink();
-
-                      return AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: Image.file(
-                          image,
-                          fit: BoxFit.cover,
-                        ),
-                      );
-                    },
+                  ListenableBuilder(
+                    listenable: Listenable.merge(
+                      [
+                        _localImage,
+                        _imageUrl,
+                      ],
+                    ),
+                    builder: (context, _) => CreatePoemCover(
+                      enabled: !isProcessing,
+                      imagePath: _localImage.value?.path,
+                      imageUrl: _imageUrl.value,
+                      onRemove: () {
+                        _localImage.value = null;
+                        _imageUrl.value = null;
+                      },
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -234,7 +238,7 @@ mixin _UpdatePoemScreenStateMixin on State<UpdatePoemScreen> {
 
   late final ValueNotifier<String?> _imageUrl;
 
-  void _onCreatePoemStateChanged() {
+  void _onUpdatePoemStateChanged() {
     final state = _updatePoemController.state;
 
     if (!mounted) return;
@@ -256,11 +260,12 @@ mixin _UpdatePoemScreenStateMixin on State<UpdatePoemScreen> {
     if (content.isEmpty) return;
 
     _updatePoemController.updatePoem(
-      data: CreatePoemData(
+      data: PoemData(
         title: text,
         content: content,
         music: _music.value,
         cover: _localImage.value?.path,
+        originalCover: _imageUrl.value,
         fontFamily: _selectedFontFamily.value,
       ),
     );
@@ -306,7 +311,7 @@ mixin _UpdatePoemScreenStateMixin on State<UpdatePoemScreen> {
     _localImage.value = file;
   }
 
-  Future<void> _onPresMic() async {
+  Future<void> _onPressMic() async {
     final transcription = await SpeechToTextDialog.show(
       context,
       content: _contentController.text,
@@ -348,7 +353,7 @@ mixin _UpdatePoemScreenStateMixin on State<UpdatePoemScreen> {
         poem: widget.poem,
       ),
     )..addListener(
-        _onCreatePoemStateChanged,
+        _onUpdatePoemStateChanged,
       );
 
     _selectedFontFamily = ValueNotifier<String?>(widget.poem.fontFamily);
@@ -365,7 +370,7 @@ mixin _UpdatePoemScreenStateMixin on State<UpdatePoemScreen> {
     _titleFocusNode.dispose();
     _contentFocusNode.dispose();
 
-    _updatePoemController.removeListener(_onCreatePoemStateChanged);
+    _updatePoemController.removeListener(_onUpdatePoemStateChanged);
     _updatePoemController.dispose();
 
     _music.dispose();
