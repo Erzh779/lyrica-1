@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:audio_session/audio_session.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -61,6 +62,9 @@ class _SpeechToTextDialogState extends State<SpeechToTextDialog> {
         final uuid = const Uuid().v4();
         final filePath = path.join(dir.path, '$uuid.wav');
 
+        final audioSession = await AudioSession.instance;
+        await audioSession.configure(AudioSessionConfiguration.speech());
+
         await _recorder.start(
           RecordConfig(
             sampleRate: 16000,
@@ -116,7 +120,7 @@ class _SpeechToTextDialogState extends State<SpeechToTextDialog> {
       final result = await OpenAI.instance.audio.createTranscription(
         file: file,
         prompt: _promtBuilder(),
-        temperature: .1,
+        temperature: 0,
         model: 'whisper-1',
       );
 
@@ -135,16 +139,7 @@ class _SpeechToTextDialogState extends State<SpeechToTextDialog> {
 
   String _promtBuilder() {
     final sb = StringBuffer();
-    sb.writeln(
-        'You are hearing a poem. Please transcribe it as it should be presented in verse.');
-    sb.writeln('The poem may contain lines with different rhymes and rhythms.');
-    sb.writeln('Make sure that the structure of the poem is maintained.');
-    sb.writeln('The poem maybe in Kazakh or Russian or English.');
-
-    if (widget.content.isNotEmpty) {
-      sb.writeln('The poem is: ${widget.content}');
-    }
-
+    sb.writeln('Please transcribe the following audio into text');
     return sb.toString();
   }
 
