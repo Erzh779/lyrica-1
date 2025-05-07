@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:poem/src/core/extension/build_context.dart';
 import 'package:poem/src/features/music/widget/selected_music_widget.dart';
 import 'package:poem/src/features/poems/model/poem.dart';
+import 'package:poem/src/features/poems/widget/text_to_speech_dialog.dart';
 
 /// {@template poem_screen}
 /// PoemScreen widget.
@@ -28,6 +29,20 @@ class _PoemScreenState extends State<PoemScreen> with _PoemScreenStateMixin {
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: Text(widget.poem.title),
+          actions: [
+            IconButton(
+              icon: const Icon(
+                Icons.play_arrow_rounded,
+              ),
+              onPressed: () {
+                TextToSpeechDialog.show(
+                  context,
+                  id: widget.poem.id,
+                  content: widget.poem.content,
+                );
+              },
+            ),
+          ],
         ),
         body: SafeArea(
           child: Column(
