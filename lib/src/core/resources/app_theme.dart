@@ -96,8 +96,9 @@ class AppTheme {
           iconTheme: IconThemeData(
             color: colors.primary,
           ),
-          titleTextStyle: typography.headlineSmall.copyWith(
+          titleTextStyle: typography.bodyLarge.copyWith(
             color: colors.onBackground,
+            fontWeight: FontWeight.w500,
           ),
         ),
         extensions: [

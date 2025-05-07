@@ -58,15 +58,10 @@ class _TextToSpeechDialogState extends State<TextToSpeechDialog> {
     });
 
     try {
-      final directory = await path_provider.getApplicationDocumentsDirectory();
-      final poemsDirectory = Directory(path.join(directory.path, 'poems'));
-
-      if (!poemsDirectory.existsSync()) {
-        await poemsDirectory.create(recursive: true);
-      }
+      final directory = await path_provider.getTemporaryDirectory();
 
       final audioName = 'audio_${widget.id}.mp3';
-      final audioFile = File(path.join(poemsDirectory.path, audioName));
+      final audioFile = File(path.join(directory.path, audioName));
 
       if (audioFile.existsSync()) {
         await _player.setFilePath(audioFile.path);
@@ -79,7 +74,7 @@ class _TextToSpeechDialogState extends State<TextToSpeechDialog> {
         model: 'gpt-4o-mini-tts',
         responseFormat: OpenAIAudioSpeechResponseFormat.mp3,
         voice: 'nova',
-        outputDirectory: poemsDirectory,
+        outputDirectory: directory,
         outputFileName: path.basename(audioFile.path),
       );
 

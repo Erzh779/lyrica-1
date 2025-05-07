@@ -35,10 +35,15 @@ class _PoemScreenState extends State<PoemScreen> with _PoemScreenStateMixin {
                 Icons.play_arrow_rounded,
               ),
               onPressed: () {
+                setState(() => _isTtsOpen = true);
                 TextToSpeechDialog.show(
                   context,
                   id: widget.poem.id,
                   content: widget.poem.content,
+                ).whenComplete(
+                  () => setState(
+                    () => _isTtsOpen = false,
+                  ),
                 );
               },
             ),
@@ -77,6 +82,7 @@ class _PoemScreenState extends State<PoemScreen> with _PoemScreenStateMixin {
                     16.0,
                   ),
                   child: SelectedMusicWidget(
+                    enabled: !_isTtsOpen,
                     title: widget.poem.music!.title,
                     url: widget.poem.music!.url,
                   ),
@@ -88,6 +94,8 @@ class _PoemScreenState extends State<PoemScreen> with _PoemScreenStateMixin {
 }
 
 mixin _PoemScreenStateMixin on State<PoemScreen> {
+  bool _isTtsOpen = false;
+
   @override
   void initState() {
     super.initState();
