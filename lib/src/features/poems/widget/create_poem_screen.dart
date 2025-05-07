@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:octopus/octopus.dart';
 import 'package:poem/src/core/extension/build_context.dart';
@@ -11,9 +8,9 @@ import 'package:poem/src/core/widget/ui_text_field.dart';
 import 'package:poem/src/features/dependencies/widget/authenticated_dependencies_scope.dart';
 import 'package:poem/src/features/music/model/music.dart';
 import 'package:poem/src/features/music/widget/background_music_screen.dart';
+import 'package:poem/src/features/music/widget/selected_music_widget.dart';
 import 'package:poem/src/features/poems/controller/create_poem_controller.dart';
 import 'package:poem/src/features/poems/model/create_poem_data.dart';
-import 'package:poem/src/features/poems/widget/selected_music_widget.dart';
 
 /// {@template create_poem_screen}
 /// CreatePoemScreen widget.
@@ -38,139 +35,118 @@ class _CreatePoemScreenState extends State<CreatePoemScreen>
         ),
         builder: (context, isProcessing, child) => PopScope(
           canPop: !isProcessing,
-          child: child!,
-        ),
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text('Create Poem'),
-            actions: [
-              StateControllerProcessingBuilder(
-                stateController: _createPoemController,
-                isProcessing: (state) => state.isProcessing,
-                builder: (context, isProcessing) => TextButton(
-                  onPressed: isProcessing ? null : _onPressSave,
-                  child: const Text(
-                    'Save',
-                  ),
-                ),
-              ),
-            ],
-            actionsPadding: const EdgeInsets.only(
-              right: 16.0,
-            ),
-          ),
-          body: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: StateControllerProcessingBuilder(
-                    stateController: _createPoemController,
-                    isProcessing: (state) => state.isProcessing,
-                    builder: (context, isProcessing) => UiTextField.primary(
-                      hintText: 'Title',
-                      enabled: !isProcessing,
-                      controller: _titleController,
-                      focusNode: _titleFocusNode,
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Create Poem'),
+              actions: [
+                StateControllerProcessingBuilder(
+                  stateController: _createPoemController,
+                  isProcessing: (state) => state.isProcessing,
+                  builder: (context, isProcessing) => TextButton(
+                    onPressed: isProcessing ? null : _onPressSave,
+                    child: const Text(
+                      'Save',
                     ),
-                  ),
-                ),
-                Expanded(
-                  child: TextField(
-                    expands: true,
-                    maxLines: null,
-                    textAlignVertical: TextAlignVertical.top,
-                    focusNode: _contentFocusNode,
-                    controller: _contentController,
-                    onTapOutside: (event) => _contentFocusNode.unfocus(),
-                    decoration: const InputDecoration(
-                      hintText: 'Enter your poem here...',
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      errorBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      filled: false,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    spacing: 8.0,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ListenableBuilder(
-                        listenable: Listenable.merge([
-                          _music,
-                          _playerState,
-                        ]),
-                        builder: (context, _) {
-                          final music = _music.value;
-                          final playerState = _playerState.value;
-
-                          if (music != null) {
-                            return SelectedMusicWidget(
-                              title: music.title,
-                              onRemovePressed: () => _music.value = null,
-                              onMusicPressed: _onPressSelectMusic,
-                              isPlaying: playerState == PlayerState.playing,
-                              onPlayPausePressed: () {
-                                if (_audioPlayer.state == PlayerState.playing) {
-                                  _audioPlayer.pause().then(
-                                    (_) {
-                                      if (!mounted) return null;
-                                      return _playerState.value =
-                                          PlayerState.paused;
-                                    },
-                                  );
-                                } else {
-                                  _audioPlayer.resume().then(
-                                    (_) {
-                                      if (!mounted) return null;
-                                      return _playerState.value =
-                                          PlayerState.playing;
-                                    },
-                                  );
-                                }
-                              },
-                            );
-                          }
-
-                          return UiButton.secondary(
-                            onPressed: _onPressSelectMusic,
-                            label: const Text(
-                              'Select Background Music',
-                            ),
-                          );
-                        },
-                      ),
-                      Row(
-                        spacing: 8.0,
-                        children: [
-                          Expanded(
-                            child: UiButton.secondary(
-                              onPressed: () {},
-                              label: const Text(
-                                'Change Font',
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: UiButton.primary(
-                              onPressed: () {},
-                              label: const Text(
-                                'Auto Edit punctuation',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
                   ),
                 ),
               ],
+              actionsPadding: const EdgeInsets.only(
+                right: 16.0,
+              ),
+            ),
+            body: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: StateControllerProcessingBuilder(
+                      stateController: _createPoemController,
+                      isProcessing: (state) => state.isProcessing,
+                      builder: (context, isProcessing) => UiTextField.primary(
+                        hintText: 'Title',
+                        enabled: !isProcessing,
+                        controller: _titleController,
+                        focusNode: _titleFocusNode,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      enabled: !isProcessing,
+                      expands: true,
+                      maxLines: null,
+                      textAlignVertical: TextAlignVertical.top,
+                      focusNode: _contentFocusNode,
+                      controller: _contentController,
+                      onTapOutside: (event) => _contentFocusNode.unfocus(),
+                      decoration: const InputDecoration(
+                        hintText: 'Enter your poem here...',
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        filled: false,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      spacing: 8.0,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        ValueListenableBuilder(
+                          valueListenable: _music,
+                          builder: (context, music, _) {
+                            if (music != null) {
+                              return SelectedMusicWidget(
+                                enabled: !isProcessing,
+                                title: music.title,
+                                url: music.url,
+                                onRemovePressed: () => _music.value = null,
+                                onMusicPressed: _onPressSelectMusic,
+                              );
+                            }
+
+                            return UiButton.secondary(
+                              enabled: !isProcessing,
+                              onPressed: _onPressSelectMusic,
+                              label: const Text(
+                                'Select Background Music',
+                              ),
+                            );
+                          },
+                        ),
+                        Row(
+                          spacing: 8.0,
+                          children: [
+                            Expanded(
+                              child: UiButton.secondary(
+                                onPressed: () {},
+                                enabled: !isProcessing,
+                                label: const Text(
+                                  'Change Font',
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: UiButton.primary(
+                                onPressed: () {},
+                                enabled: !isProcessing,
+                                label: const Text(
+                                  'Auto Edit punctuation',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -190,14 +166,6 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
 
   final ValueNotifier<Music?> _music = ValueNotifier(null);
 
-  late final AudioPlayer _audioPlayer;
-
-  StreamSubscription<AudioEvent>? _audioPlayerSubscription;
-
-  final ValueNotifier<PlayerState> _playerState = ValueNotifier(
-    PlayerState.stopped,
-  );
-
   void _onCreatePoemStateChanged() {
     final state = _createPoemController.state;
 
@@ -211,48 +179,12 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
     }
   }
 
-  void _onMusicChanged() {
-    final music = _music.value;
-    if (music == null) {
-      if (_audioPlayer.state == PlayerState.playing) {
-        _audioPlayer.stop().then(
-          (_) {
-            if (!mounted) return null;
-            return _playerState.value = PlayerState.stopped;
-          },
-        );
-      }
-
-      return;
-    }
-
-    _audioPlayer.setSourceUrl(music.url);
-    _audioPlayer.setReleaseMode(ReleaseMode.loop);
-  }
-
-  void _onPlayerEvent(
-    AudioEvent event,
-  ) {
-    if (event.eventType == AudioEventType.complete) {
-      _playerState.value = PlayerState.stopped;
-    }
-  }
-
   void _onPressSave() {
     final text = _titleController.text;
     if (text.isEmpty) return;
 
     final content = _contentController.text;
     if (content.isEmpty) return;
-
-    if (_audioPlayer.state == PlayerState.playing) {
-      _audioPlayer.pause().then(
-        (_) {
-          if (!mounted) return null;
-          return _playerState.value = PlayerState.paused;
-        },
-      );
-    }
 
     _createPoemController.submit(
       CreatePoemData(
@@ -289,18 +221,6 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
     )..addListener(
         _onCreatePoemStateChanged,
       );
-
-    _audioPlayer = AudioPlayer(
-      playerId: 'poem_background_music_player',
-    );
-
-    _audioPlayerSubscription = _audioPlayer.eventStream.listen(
-      _onPlayerEvent,
-    );
-
-    _music.addListener(
-      _onMusicChanged,
-    );
   }
 
   @override
@@ -314,11 +234,7 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
     _createPoemController.removeListener(_onCreatePoemStateChanged);
     _createPoemController.dispose();
 
-    _music.removeListener(_onMusicChanged);
     _music.dispose();
-
-    _audioPlayerSubscription?.cancel();
-    _audioPlayer.dispose();
 
     super.dispose();
   }

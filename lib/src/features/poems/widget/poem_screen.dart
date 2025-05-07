@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:poem/src/core/extension/build_context.dart';
+import 'package:poem/src/features/music/widget/selected_music_widget.dart';
 import 'package:poem/src/features/poems/model/poem.dart';
-import 'package:poem/src/features/poems/widget/selected_music_widget.dart';
 
 /// {@template poem_screen}
 /// PoemScreen widget.
@@ -53,8 +53,7 @@ class _PoemScreenState extends State<PoemScreen> with _PoemScreenStateMixin {
                     valueListenable: _isPlaying,
                     builder: (context, isPlaying, child) => SelectedMusicWidget(
                       title: widget.poem.music!.title,
-                      onPlayPausePressed: _onPlayPausePressed,
-                      isPlaying: isPlaying,
+                      url: widget.poem.music!.url,
                     ),
                   ),
                 ),

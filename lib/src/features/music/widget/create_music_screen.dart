@@ -8,12 +8,13 @@ import 'package:path/path.dart' as path;
 import 'package:poem/src/core/extension/build_context.dart';
 import 'package:poem/src/core/utils/error_util.dart';
 import 'package:poem/src/core/widget/ui_button.dart';
+import 'package:poem/src/core/widget/ui_text.dart';
 import 'package:poem/src/core/widget/ui_text_field.dart';
 import 'package:poem/src/features/dependencies/widget/authenticated_dependencies_scope.dart';
 import 'package:poem/src/features/music/controller/create_music_controller.dart';
 import 'package:poem/src/features/music/controller/genres_controller.dart';
 import 'package:poem/src/features/music/model/genre.dart';
-import 'package:poem/src/features/poems/widget/selected_music_widget.dart';
+import 'package:poem/src/features/music/widget/selected_music_widget.dart';
 
 /// {@template create_music_screen}
 /// CreateMusicScreen widget.
@@ -68,6 +69,8 @@ class _CreateMusicScreenState extends State<CreateMusicScreen>
 
                               return SelectedMusicWidget(
                                 title: fileName,
+                                path: file.path,
+                                onRemovePressed: () => _file.value = null,
                               );
                             }
 
@@ -96,27 +99,51 @@ class _CreateMusicScreenState extends State<CreateMusicScreen>
                         StateConsumer<GenresController, GenresState>(
                           controller: _genresController,
                           builder: (context, state, child) {
+                            final enabled =
+                                !state.isProcessing && !isProcessing;
+
                             final genres = state.genres;
 
-                            return ValueListenableBuilder(
-                              valueListenable: _genre,
-                              builder: (context, value, _) =>
-                                  DropdownButtonHideUnderline(
-                                child: DropdownButton<Genre>(
-                                  value: value,
-                                  items: genres
-                                      .map(
-                                        (genre) => DropdownMenuItem<Genre>(
-                                          value: genre,
-                                          child: Text(
-                                            genre.displayName,
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                                  onChanged: (value) => _genre.value = value,
+                            return Row(
+                              spacing: 16.0,
+                              children: [
+                                Expanded(
+                                  child: UiText.bodyMedium(
+                                    'Genre',
+                                    color:
+                                        enabled ? null : context.colors.gray500,
+                                  ),
                                 ),
-                              ),
+                                ValueListenableBuilder(
+                                  valueListenable: _genre,
+                                  builder: (context, genre, _) =>
+                                      DropdownButtonHideUnderline(
+                                    child: DropdownButton<Genre>(
+                                      value: genre,
+                                      items: genres
+                                          .map(
+                                            (genre) => DropdownMenuItem<Genre>(
+                                              value: genre,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: UiText.bodyMedium(
+                                                  genre.displayName,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: enabled
+                                          ? (genre) => _genre.value = genre
+                                          : null,
+                                      borderRadius: BorderRadius.circular(
+                                        12.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             );
                           },
                         ),
@@ -181,6 +208,10 @@ mixin _CreateMusicScreenStateMixin on State<CreateMusicScreen> {
         context,
         state.message,
       );
+    }
+
+    if (_genre.value == null) {
+      _genre.value = state.genres.firstOrNull;
     }
   }
 
