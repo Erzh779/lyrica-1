@@ -8,6 +8,7 @@ import 'package:poem/src/features/music/widget/selected_music_widget.dart';
 import 'package:poem/src/features/poems/controller/poem_controller.dart';
 import 'package:poem/src/features/poems/model/poem.dart';
 import 'package:poem/src/features/poems/widget/text_to_speech_dialog.dart';
+import 'package:share_plus/share_plus.dart';
 
 /// {@template poem_screen}
 /// PoemScreen widget.
@@ -58,8 +59,7 @@ class _PoemScreenState extends State<PoemScreen> with _PoemScreenStateMixin {
               ),
               Builder(
                 builder: (context) {
-                  final isSameId =
-                      AuthScope.isSameId(context, widget.poem.authorId);
+                  final isSameId = AuthScope.isSameId(context, widget.poem.authorId);
 
                   if (!isSameId) return const SizedBox.shrink();
 
@@ -67,11 +67,15 @@ class _PoemScreenState extends State<PoemScreen> with _PoemScreenStateMixin {
                     icon: const Icon(
                       Icons.delete_rounded,
                     ),
-                    onPressed: isProcessing
-                        ? null
-                        : () => _poemController.deletePoem(widget.poem),
+                    onPressed: isProcessing ? null : () => _poemController.deletePoem(widget.poem),
                   );
                 },
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.share_rounded,
+                ),
+                onPressed: isProcessing ? null : _onPressShare,
               ),
             ],
           ),
@@ -129,11 +133,23 @@ mixin _PoemScreenStateMixin on State<PoemScreen> {
     final state = _poemController.state;
 
     if (state.isDeleted) {
-      final poemsController =
-          AuthenticatedDependenciesScope.of(context).poemsController;
+      final poemsController = AuthenticatedDependenciesScope.of(context).poemsController;
       poemsController.deletePoem(widget.poem);
       Navigator.pop(context);
     }
+  }
+
+  void _onPressShare() {
+    final sb = StringBuffer();
+
+    sb.writeln('Title: ${widget.poem.title}');
+    sb.writeln('${widget.poem.content}');
+
+    SharePlus.instance.share(
+      ShareParams(
+        text: sb.toString(),
+      ),
+    );
   }
 
   @override

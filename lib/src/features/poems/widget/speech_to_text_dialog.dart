@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:audio_session/audio_session.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -61,9 +60,6 @@ class _SpeechToTextDialogState extends State<SpeechToTextDialog> {
 
         final uuid = const Uuid().v4();
         final filePath = path.join(dir.path, '$uuid.wav');
-
-        final audioSession = await AudioSession.instance;
-        await audioSession.configure(AudioSessionConfiguration.speech());
 
         await _recorder.start(
           RecordConfig(
@@ -134,6 +130,8 @@ class _SpeechToTextDialogState extends State<SpeechToTextDialog> {
       Navigator.of(context).pop(result.text);
     } catch (e) {
       setState(() => _error = 'Connection error: $e');
+    } finally {
+      setState(() => _isTranscribing = false);
     }
   }
 
