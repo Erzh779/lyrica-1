@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:octopus/octopus.dart';
 import 'package:poem/src/core/extension/build_context.dart';
 import 'package:poem/src/core/utils/error_util.dart';
@@ -58,6 +61,20 @@ class _CreatePoemScreenState extends State<CreatePoemScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  ValueListenableBuilder(
+                    valueListenable: _image,
+                    builder: (context, image, _) {
+                      if (image == null) return const SizedBox.shrink();
+
+                      return AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: Image.file(
+                          image,
+                          fit: BoxFit.cover,
+                        ),
+                      );
+                    },
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: StateControllerProcessingBuilder(
@@ -97,27 +114,48 @@ class _CreatePoemScreenState extends State<CreatePoemScreen>
                       spacing: 8.0,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        ValueListenableBuilder(
-                          valueListenable: _music,
-                          builder: (context, music, _) {
-                            if (music != null) {
-                              return SelectedMusicWidget(
-                                enabled: !isProcessing,
-                                title: music.title,
-                                url: music.url,
-                                onRemovePressed: () => _music.value = null,
-                                onMusicPressed: _onPressSelectMusic,
-                              );
-                            }
+                        Row(
+                          spacing: 8.0,
+                          children: [
+                            Expanded(
+                              child: ValueListenableBuilder(
+                                valueListenable: _music,
+                                builder: (context, music, _) {
+                                  if (music != null) {
+                                    return SelectedMusicWidget(
+                                      enabled: !isProcessing,
+                                      title: music.title,
+                                      url: music.url,
+                                      onRemovePressed: () =>
+                                          _music.value = null,
+                                      onMusicPressed: _onPressSelectMusic,
+                                    );
+                                  }
 
-                            return UiButton.secondary(
-                              enabled: !isProcessing,
-                              onPressed: _onPressSelectMusic,
-                              label: const Text(
-                                'Select Background Music',
+                                  return UiButton.secondary(
+                                    enabled: !isProcessing,
+                                    onPressed: _onPressSelectMusic,
+                                    label: const Text(
+                                      'Select Music',
+                                    ),
+                                  );
+                                },
                               ),
-                            );
-                          },
+                            ),
+                            Expanded(
+                              child: ValueListenableBuilder(
+                                valueListenable: _image,
+                                builder: (context, image, _) =>
+                                    UiButton.secondary(
+                                  enabled: !isProcessing,
+                                  onPressed: _onPressSelectImage,
+                                  label: const Text(
+                                    'Select Cover',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         Row(
                           spacing: 8.0,
@@ -166,6 +204,8 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
 
   final ValueNotifier<Music?> _music = ValueNotifier(null);
 
+  final ValueNotifier<File?> _image = ValueNotifier(null);
+
   void _onCreatePoemStateChanged() {
     final state = _createPoemController.state;
 
@@ -191,6 +231,7 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
         title: text,
         content: content,
         music: _music.value,
+        cover: _image.value?.path,
       ),
     );
   }
@@ -207,6 +248,21 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
           if (value != null) _music.value = value;
         },
       );
+
+  Future<void> _onPressSelectImage() async {
+    final picker = ImagePicker();
+    final result = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+    );
+
+    if (result == null) return;
+
+    final file = File(result.path);
+    if (!mounted) return;
+
+    _image.value = file;
+  }
 
   @override
   void initState() {

@@ -55,7 +55,7 @@ class _SelectedMusicWidgetState extends State<SelectedMusicWidget> {
 
   void _setSource() {
     if (widget.path != null) {
-      _audioPlayer.setSourceUrl(widget.path!);
+      _audioPlayer.setSourceDeviceFile(widget.path!);
       _audioPlayer.setReleaseMode(ReleaseMode.stop);
     } else if (widget.url != null) {
       _audioPlayer.setSourceUrl(widget.url!);

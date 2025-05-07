@@ -35,6 +35,8 @@ dependencies:
   dart_openai: ^5.1.0
   path: ^1.9.1
   audioplayers: ^6.4.0
+  image_picker: ^1.1.2
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

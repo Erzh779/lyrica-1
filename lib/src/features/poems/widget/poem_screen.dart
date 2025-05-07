@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:poem/src/core/extension/build_context.dart';
 import 'package:poem/src/features/music/widget/selected_music_widget.dart';
@@ -34,6 +35,14 @@ class _PoemScreenState extends State<PoemScreen> with _PoemScreenStateMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (widget.poem.cover != null)
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: CachedNetworkImage(
+                    imageUrl: widget.poem.cover!,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),

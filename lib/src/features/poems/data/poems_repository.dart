@@ -79,8 +79,10 @@ class PoemsRepository$Supabase implements IPoemsRepository {
     final extension = path.extension(file.path);
     final fileName = '${_uuid.v4()}$extension';
     final filePath = '${$path}/$fileName';
+
     await storage.upload(filePath, file);
-    return filePath;
+
+    return storage.getPublicUrl(filePath);
   }
 
   @override
@@ -93,7 +95,7 @@ class PoemsRepository$Supabase implements IPoemsRepository {
 
       if (poem.cover != null) {
         final file = File(poem.cover!);
-        coverUrl = await _uploadFile('poems/cover', file);
+        coverUrl = await _uploadFile('images', file);
       }
 
       // create a new poem in the database

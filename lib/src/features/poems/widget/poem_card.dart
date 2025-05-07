@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:poem/src/core/extension/build_context.dart';
 import 'package:poem/src/core/widget/ui_text.dart';
@@ -73,19 +74,37 @@ class PoemCard extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: Ink(
-                    decoration: BoxDecoration(
-                      color: context.colors.gray100,
-                      borderRadius: BorderRadius.circular(
-                        12.0,
-                      ),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.image_not_supported_outlined,
-                      ),
-                    ),
-                  ),
+                  child: poem.cover == null
+                      ? Ink(
+                          decoration: BoxDecoration(
+                            color: context.colors.gray100,
+                            borderRadius: BorderRadius.circular(
+                              12.0,
+                            ),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.image_not_supported_outlined,
+                            ),
+                          ),
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: poem.cover!,
+                          fit: BoxFit.cover,
+                          errorWidget: (context, url, error) => Ink(
+                            decoration: BoxDecoration(
+                              color: context.colors.gray100,
+                              borderRadius: BorderRadius.circular(
+                                12.0,
+                              ),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.image_not_supported_outlined,
+                              ),
+                            ),
+                          ),
+                        ),
                 ),
               ],
             ),

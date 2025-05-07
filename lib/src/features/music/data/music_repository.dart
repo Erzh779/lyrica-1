@@ -59,8 +59,7 @@ class MusicRepository implements IMusicRepository {
 
     await storage.upload(filePath, file);
 
-    final publicUrl = await storage.getPublicUrl(filePath);
-    return publicUrl;
+    return storage.getPublicUrl(filePath);
   }
 
   @override

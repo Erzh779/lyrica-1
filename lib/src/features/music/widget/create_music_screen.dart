@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:control/control.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:octopus/octopus.dart';
 import 'package:path/path.dart' as path;
 import 'package:poem/src/core/extension/build_context.dart';
 import 'package:poem/src/core/utils/error_util.dart';
@@ -69,6 +68,7 @@ class _CreateMusicScreenState extends State<CreateMusicScreen>
 
                               return SelectedMusicWidget(
                                 title: fileName,
+                                enabled: !isProcessing,
                                 path: file.path,
                                 onRemovePressed: () => _file.value = null,
                               );
@@ -189,7 +189,7 @@ mixin _CreateMusicScreenStateMixin on State<CreateMusicScreen> {
           AuthenticatedDependenciesScope.of(context).musicListController;
 
       musicListController.addMusic(music);
-      context.octopus.pop();
+      Navigator.pop(context, music);
     } else if (state.isFailed) {
       ErrorUtil.showSnackBar(
         context,
@@ -267,11 +267,13 @@ mixin _CreateMusicScreenStateMixin on State<CreateMusicScreen> {
       initialState: GenresState.initial(
         genres: [],
       ),
-    )
-      ..addListener(
-        _onGenresControllerStateChanged,
-      )
-      ..query();
+    );
+
+    _genresController.addListener(
+      _onGenresControllerStateChanged,
+    );
+
+    _genresController.query();
   }
 
   @override
