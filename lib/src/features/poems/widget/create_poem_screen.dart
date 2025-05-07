@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:octopus/octopus.dart';
 import 'package:poem/src/core/extension/build_context.dart';
@@ -14,6 +15,7 @@ import 'package:poem/src/features/music/widget/background_music_screen.dart';
 import 'package:poem/src/features/music/widget/selected_music_widget.dart';
 import 'package:poem/src/features/poems/controller/create_poem_controller.dart';
 import 'package:poem/src/features/poems/model/create_poem_data.dart';
+import 'package:poem/src/features/poems/widget/select_font_bottom_modal_sheet.dart';
 
 /// {@template create_poem_screen}
 /// CreatePoemScreen widget.
@@ -89,23 +91,36 @@ class _CreatePoemScreenState extends State<CreatePoemScreen>
                     ),
                   ),
                   Expanded(
-                    child: TextField(
-                      enabled: !isProcessing,
-                      expands: true,
-                      maxLines: null,
-                      textAlignVertical: TextAlignVertical.top,
-                      focusNode: _contentFocusNode,
-                      controller: _contentController,
-                      onTapOutside: (event) => _contentFocusNode.unfocus(),
-                      decoration: const InputDecoration(
-                        hintText: 'Enter your poem here...',
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none,
-                        filled: false,
-                      ),
+                    child: ValueListenableBuilder(
+                      valueListenable: _selectedFontFamily,
+                      builder: (context, fontFamily, _) {
+                        final font = fontFamily != null
+                            ? GoogleFonts.getFont(
+                                fontFamily,
+                                textStyle: context.typography.bodyLarge,
+                              )
+                            : context.typography.bodyLarge;
+
+                        return TextField(
+                          enabled: !isProcessing,
+                          expands: true,
+                          maxLines: null,
+                          textAlignVertical: TextAlignVertical.top,
+                          focusNode: _contentFocusNode,
+                          controller: _contentController,
+                          onTapOutside: (event) => _contentFocusNode.unfocus(),
+                          style: font,
+                          decoration: const InputDecoration(
+                            hintText: 'Enter your poem here...',
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            filled: false,
+                          ),
+                        );
+                      },
                     ),
                   ),
                   Padding(
@@ -162,7 +177,7 @@ class _CreatePoemScreenState extends State<CreatePoemScreen>
                           children: [
                             Expanded(
                               child: UiButton.secondary(
-                                onPressed: () {},
+                                onPressed: _onPressSelectFont,
                                 enabled: !isProcessing,
                                 label: const Text(
                                   'Change Font',
@@ -202,6 +217,9 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
 
   late final CreatePoemController _createPoemController;
 
+  final ValueNotifier<String?> _selectedFontFamily =
+      ValueNotifier<String?>(null);
+
   final ValueNotifier<Music?> _music = ValueNotifier(null);
 
   final ValueNotifier<File?> _image = ValueNotifier(null);
@@ -232,6 +250,7 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
         content: content,
         music: _music.value,
         cover: _image.value?.path,
+        fontFamily: _selectedFontFamily.value,
       ),
     );
   }
@@ -248,6 +267,18 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
           if (value != null) _music.value = value;
         },
       );
+
+  Future<void> _onPressSelectFont() async {
+    final font = await SelectFontBottomModalSheet.show(
+      context,
+      selectedFontFamily: _selectedFontFamily.value,
+    );
+
+    if (font == null) return;
+    if (!mounted) return;
+
+    _selectedFontFamily.value = font;
+  }
 
   Future<void> _onPressSelectImage() async {
     final picker = ImagePicker();

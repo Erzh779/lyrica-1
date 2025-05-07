@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:poem/src/core/extension/build_context.dart';
 import 'package:poem/src/features/music/widget/selected_music_widget.dart';
 import 'package:poem/src/features/poems/model/poem.dart';
@@ -48,7 +49,12 @@ class _PoemScreenState extends State<PoemScreen> with _PoemScreenStateMixin {
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
                     widget.poem.content,
-                    style: context.typography.bodyMedium,
+                    style: widget.poem.fontFamily != null
+                        ? GoogleFonts.getFont(
+                            widget.poem.fontFamily!,
+                            textStyle: context.typography.bodyLarge,
+                          )
+                        : context.typography.bodyLarge,
                     textAlign: TextAlign.left,
                   ),
                 ),
