@@ -136,20 +136,14 @@ class PoemsRepository$Supabase implements IPoemsRepository {
   Future<List<Poem>> queryPoems() async {
     final userId = _client.auth.currentUser!.id;
 
-    final response = await _poems
-        .select()
-        .eq('author_id', userId)
-        .order('created_at', ascending: false);
+    final response = await _poems.select().eq('author_id', userId).order('created_at', ascending: false);
 
-    final poems = (response as List)
-        .map((e) => Poem.fromJson(e as Map<String, Object?>))
-        .toList();
+    final poems = (response as List).map((e) => Poem.fromJson(e as Map<String, Object?>)).toList();
 
     final musicIds = poems.map((e) => e.musicId).whereType<int>().toList();
     if (musicIds.isEmpty) return poems;
 
-    final musicResponse =
-        await _client.from('music').select().inFilter('id', musicIds);
+    final musicResponse = await _client.from('music').select().inFilter('id', musicIds);
 
     final music = (musicResponse as List)
         .map((e) => Music.fromJson(e as Map<String, Object?>))
@@ -167,8 +161,34 @@ class PoemsRepository$Supabase implements IPoemsRepository {
   Future<Poem> updatePoem(
     Poem poem,
     CreatePoemData data,
-  ) {
-    // TODO: implement updatePoem
-    throw UnimplementedError();
+  ) async {
+    try {
+      // upload cover image if provided
+      String? coverUrl;
+
+      if (data.cover != null) {
+        final file = File(data.cover!);
+        coverUrl = await _uploadFile('images', file);
+      }
+
+      // update the poem in the database
+      final response = await _poems
+          .update({
+            'title': data.title,
+            'content': data.content,
+            'cover': coverUrl,
+            'music_id': data.music?.id,
+            'font_family': data.fontFamily,
+          })
+          .eq('id', poem.id)
+          .select()
+          .single();
+
+      return Poem.fromJson(response).copyWith(
+        music: () => data.music,
+      );
+    } on Object {
+      rethrow; // or Error.throwWithStackTrace(error, stackTrace);
+    }
   }
 }

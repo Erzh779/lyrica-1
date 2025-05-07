@@ -3,8 +3,7 @@ import 'package:meta/meta.dart';
 import 'package:poem/src/features/poems/data/poems_repository.dart';
 import 'package:poem/src/features/poems/model/poem.dart';
 
-final class PoemController extends StateController<PoemState>
-    with SequentialControllerHandler {
+final class PoemController extends StateController<PoemState> with SequentialControllerHandler {
   PoemController({
     required IPoemsRepository repository,
     required super.initialState,
@@ -36,6 +35,30 @@ final class PoemController extends StateController<PoemState>
           PoemState.failed(
             poem: state.poem,
             message: 'Failed to delete poem: $error',
+          ),
+        ),
+        done: () async => setState(
+          PoemState.idle(
+            poem: state.poem,
+          ),
+        ),
+      );
+
+  /// Update a poem.
+  void updatePoem(Poem poem) => handle(
+        name: 'UpdatePoem',
+        () async {
+          setState(
+            PoemState.succeeded(
+              poem: poem,
+              message: 'Poem updated successfully!',
+            ),
+          );
+        },
+        error: (error, stackTrace) async => setState(
+          PoemState.failed(
+            poem: state.poem,
+            message: 'Failed to update poem: $error',
           ),
         ),
         done: () async => setState(
@@ -110,8 +133,7 @@ final class PoemState$Idle extends PoemState {
 
 /// Processing
 final class PoemState$Processing extends PoemState {
-  const PoemState$Processing(
-      {required super.poem, super.message = 'Processing'});
+  const PoemState$Processing({required super.poem, super.message = 'Processing'});
 
   @override
   String get type => 'processing';
@@ -228,11 +250,7 @@ abstract base class _$PoemStateBase {
   int get hashCode => Object.hash(type, poem);
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is _$PoemStateBase &&
-          type == other.type &&
-          identical(poem, other.poem));
+  bool operator ==(Object other) => identical(this, other) || (other is _$PoemStateBase && type == other.type && identical(poem, other.poem));
 
   @override
   String toString() => 'PoemState.$type{message: $message}';

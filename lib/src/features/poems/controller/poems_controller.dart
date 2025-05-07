@@ -18,8 +18,7 @@ import 'package:poem/src/features/poems/model/poem.dart';
 ///
 /// Constructor:
 
-final class PoemsController extends StateController<PoemsState>
-    with SequentialControllerHandler {
+final class PoemsController extends StateController<PoemsState> with SequentialControllerHandler {
   /// {@macro poems_controller}
   ///
   /// - [PoemsController]: Requires an [IPoemsRepository] instance and an initial
@@ -118,6 +117,41 @@ final class PoemsController extends StateController<PoemsState>
             PoemsState.succeeded(
               poems: poems,
               message: 'Poem deleted successfully! Count: ${poems.length}',
+            ),
+          );
+        },
+        error: (error, stackTrace) async => setState(
+          PoemsState.failed(
+            poems: state.poems,
+            message: ErrorUtil.formatMessage(
+              error,
+            ),
+          ),
+        ),
+        done: () async => setState(
+          PoemsState.idle(
+            poems: state.poems,
+          ),
+        ),
+      );
+
+  /// Update a poem.
+  void updatePoem(Poem poem) => handle(
+        name: 'UpdatePoem',
+        () async {
+          setState(
+            PoemsState.processing(
+              poems: state.poems,
+              message: 'Updating poem...',
+            ),
+          );
+
+          final poems = state.poems.map((p) => p.id == poem.id ? poem : p).toList();
+
+          setState(
+            PoemsState.succeeded(
+              poems: poems,
+              message: 'Poem updated successfully! Count: ${poems.length}',
             ),
           );
         },
@@ -313,11 +347,7 @@ abstract base class _$PoemsStateBase {
   int get hashCode => Object.hash(type, poems);
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is _$PoemsStateBase &&
-          type == other.type &&
-          identical(poems, other.poems));
+  bool operator ==(Object other) => identical(this, other) || (other is _$PoemsStateBase && type == other.type && identical(poems, other.poems));
 
   @override
   String toString() => 'PoemsState.$type{message: $message}';

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:octopus/octopus.dart';
 import 'package:poem/src/core/extension/build_context.dart';
 import 'package:poem/src/core/utils/error_util.dart';
 import 'package:poem/src/core/widget/state_controller_processing_builder.dart';
@@ -12,31 +11,35 @@ import 'package:poem/src/features/dependencies/widget/authenticated_dependencies
 import 'package:poem/src/features/music/model/music.dart';
 import 'package:poem/src/features/music/widget/background_music_screen.dart';
 import 'package:poem/src/features/music/widget/selected_music_widget.dart';
-import 'package:poem/src/features/poems/controller/create_poem_controller.dart';
+import 'package:poem/src/features/poems/controller/update_poem_controller.dart';
 import 'package:poem/src/features/poems/model/create_poem_data.dart';
-import 'package:poem/src/features/poems/widget/create_poem_cover.dart';
+import 'package:poem/src/features/poems/model/poem.dart';
 import 'package:poem/src/features/poems/widget/create_poem_settings_bottom_modal_sheet.dart';
 import 'package:poem/src/features/poems/widget/select_font_bottom_modal_sheet.dart';
 import 'package:poem/src/features/poems/widget/speech_to_text_dialog.dart';
 
-/// {@template create_poem_screen}
-/// CreatePoemScreen widget.
+/// {@template update_poem_screen}
+/// UpdatePoemScreen widget.
 /// {@endtemplate}
-class CreatePoemScreen extends StatefulWidget {
-  /// {@macro create_poem_screen}
-  const CreatePoemScreen({
+class UpdatePoemScreen extends StatefulWidget {
+  /// {@macro update_poem_screen}
+  const UpdatePoemScreen({
+    required this.poem,
     super.key, // ignore: unused_element
   });
 
+  /// Poem to update.
+  final Poem poem;
+
   @override
-  State<CreatePoemScreen> createState() => _CreatePoemScreenState();
+  State<UpdatePoemScreen> createState() => _UpdatePoemScreenState();
 }
 
-/// State for widget CreatePoemScreen.
-class _CreatePoemScreenState extends State<CreatePoemScreen> with _CreatePoemScreenStateMixin {
+/// State for widget UpdatePoemScreen.
+class _UpdatePoemScreenState extends State<UpdatePoemScreen> with _UpdatePoemScreenStateMixin {
   @override
   Widget build(BuildContext context) => ValueListenableBuilder(
-        valueListenable: _createPoemController.select(
+        valueListenable: _updatePoemController.select(
           (state) => state.isProcessing,
         ),
         builder: (context, isProcessing, child) => PopScope(
@@ -47,7 +50,7 @@ class _CreatePoemScreenState extends State<CreatePoemScreen> with _CreatePoemScr
               centerTitle: false,
               actions: [
                 StateControllerProcessingBuilder(
-                  stateController: _createPoemController,
+                  stateController: _updatePoemController,
                   isProcessing: (state) => state.isProcessing,
                   builder: (context, isProcessing) => IconButton(
                     onPressed: isProcessing
@@ -65,7 +68,7 @@ class _CreatePoemScreenState extends State<CreatePoemScreen> with _CreatePoemScr
                   ),
                 ),
                 StateControllerProcessingBuilder(
-                  stateController: _createPoemController,
+                  stateController: _updatePoemController,
                   isProcessing: (state) => state.isProcessing,
                   builder: (context, isProcessing) => IconButton(
                     onPressed: isProcessing ? null : _onPressSave,
@@ -75,7 +78,7 @@ class _CreatePoemScreenState extends State<CreatePoemScreen> with _CreatePoemScr
                   ),
                 ),
                 StateControllerProcessingBuilder(
-                  stateController: _createPoemController,
+                  stateController: _updatePoemController,
                   isProcessing: (state) => state.isProcessing,
                   builder: (context, isProcessing) => IconButton(
                     onPressed: isProcessing ? null : _onPresMic,
@@ -94,17 +97,23 @@ class _CreatePoemScreenState extends State<CreatePoemScreen> with _CreatePoemScr
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   ValueListenableBuilder(
-                    valueListenable: _image,
-                    builder: (context, image, _) => CreatePoemCover(
-                      enabled: !isProcessing,
-                      imagePath: image?.path,
-                      onRemove: () => _image.value = null,
-                    ),
+                    valueListenable: _localImage,
+                    builder: (context, image, _) {
+                      if (image == null) return const SizedBox.shrink();
+
+                      return AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: Image.file(
+                          image,
+                          fit: BoxFit.cover,
+                        ),
+                      );
+                    },
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: StateControllerProcessingBuilder(
-                      stateController: _createPoemController,
+                      stateController: _updatePoemController,
                       isProcessing: (state) => state.isProcessing,
                       builder: (context, isProcessing) => UiTextField.primary(
                         hintText: 'Title',
@@ -206,7 +215,7 @@ class _CreatePoemScreenState extends State<CreatePoemScreen> with _CreatePoemScr
       );
 }
 
-mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
+mixin _UpdatePoemScreenStateMixin on State<UpdatePoemScreen> {
   late final TextEditingController _titleController;
 
   late final FocusNode _titleFocusNode = FocusNode();
@@ -215,23 +224,27 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
 
   late final FocusNode _contentFocusNode = FocusNode();
 
-  late final CreatePoemController _createPoemController;
+  late final UpdatePoemController _updatePoemController;
 
-  final ValueNotifier<String?> _selectedFontFamily = ValueNotifier<String?>(null);
+  late final ValueNotifier<String?> _selectedFontFamily;
 
-  final ValueNotifier<Music?> _music = ValueNotifier(null);
+  late final ValueNotifier<Music?> _music;
 
-  final ValueNotifier<File?> _image = ValueNotifier(null);
+  late final ValueNotifier<File?> _localImage;
+
+  late final ValueNotifier<String?> _imageUrl;
 
   void _onCreatePoemStateChanged() {
-    final state = _createPoemController.state;
+    final state = _updatePoemController.state;
 
     if (!mounted) return;
     if (state.isFailed) ErrorUtil.showSnackBar(context, state.message);
     if (state.isSucceeded) {
       final poemsController = AuthenticatedDependenciesScope.of(context).poemsController;
-      poemsController.addPoem(state.poem!);
-      context.octopus.pop();
+
+      final updatedPoem = state.poem;
+      poemsController.updatePoem(updatedPoem);
+      Navigator.pop(context, updatedPoem);
     }
   }
 
@@ -242,12 +255,12 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
     final content = _contentController.text;
     if (content.isEmpty) return;
 
-    _createPoemController.submit(
-      CreatePoemData(
+    _updatePoemController.updatePoem(
+      data: CreatePoemData(
         title: text,
         content: content,
         music: _music.value,
-        cover: _image.value?.path,
+        cover: _localImage.value?.path,
         fontFamily: _selectedFontFamily.value,
       ),
     );
@@ -290,7 +303,7 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
     final file = File(result.path);
     if (!mounted) return;
 
-    _image.value = file;
+    _localImage.value = file;
   }
 
   Future<void> _onPresMic() async {
@@ -318,15 +331,30 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
   void initState() {
     super.initState();
 
-    _titleController = TextEditingController();
-    _contentController = TextEditingController();
+    _titleController = TextEditingController.fromValue(
+      TextEditingValue(
+        text: widget.poem.title,
+      ),
+    );
+    _contentController = TextEditingController.fromValue(
+      TextEditingValue(
+        text: widget.poem.content,
+      ),
+    );
 
-    _createPoemController = CreatePoemController(
+    _updatePoemController = UpdatePoemController(
       repository: context.dependencies.poemsRepository,
-      initialState: CreatePoemState.initial(),
+      initialState: UpdatePoemState.initial(
+        poem: widget.poem,
+      ),
     )..addListener(
         _onCreatePoemStateChanged,
       );
+
+    _selectedFontFamily = ValueNotifier<String?>(widget.poem.fontFamily);
+    _music = ValueNotifier<Music?>(widget.poem.music);
+    _localImage = ValueNotifier<File?>(null);
+    _imageUrl = ValueNotifier<String?>(widget.poem.cover);
   }
 
   @override
@@ -337,8 +365,8 @@ mixin _CreatePoemScreenStateMixin on State<CreatePoemScreen> {
     _titleFocusNode.dispose();
     _contentFocusNode.dispose();
 
-    _createPoemController.removeListener(_onCreatePoemStateChanged);
-    _createPoemController.dispose();
+    _updatePoemController.removeListener(_onCreatePoemStateChanged);
+    _updatePoemController.dispose();
 
     _music.dispose();
 
