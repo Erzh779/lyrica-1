@@ -38,6 +38,7 @@ dependencies:
   google_fonts: ^6.2.1
   keyboard_actions: ^4.2.0
   just_audio: ^0.10.2
+  audio_session: ^0.2.1
 
 dev_dependencies:
   flutter_test:
