@@ -7,7 +7,7 @@ import 'package:poem/src/features/poems/constant/constant.dart';
 /// {@template select_font_bottom_modal_sheet}
 /// SelectFontBottomModalSheet widget.
 /// {@endtemplate}
-class SelectFontBottomModalSheet extends StatefulWidget {
+class SelectFontBottomModalSheet extends StatelessWidget {
   /// {@macro select_font_bottom_modal_sheet}
   const SelectFontBottomModalSheet({
     this.selectedFontFamily,
@@ -33,41 +33,7 @@ class SelectFontBottomModalSheet extends StatefulWidget {
         ),
       );
 
-  @override
-  State<SelectFontBottomModalSheet> createState() =>
-      _SelectFontBottomModalSheetState();
-}
-
-/// State for widget SelectFontBottomModalSheet.
-class _SelectFontBottomModalSheetState
-    extends State<SelectFontBottomModalSheet> {
-  /* #region Lifecycle */
-  @override
-  void initState() {
-    super.initState();
-    // Initial state initialization
-  }
-
-  @override
-  void didUpdateWidget(covariant SelectFontBottomModalSheet oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Widget configuration changed
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // The configuration of InheritedWidgets has changed
-    // Also called after initState but before build
-  }
-
-  @override
-  void dispose() {
-    // Permanent removal of a tree stent
-    super.dispose();
-  }
   /* #endregion */
-
   @override
   Widget build(BuildContext context) => Ink(
         padding: const EdgeInsets.symmetric(
@@ -85,7 +51,7 @@ class _SelectFontBottomModalSheetState
           spacing: 16.0,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            UiText.headlineSmall(
+            UiText.bodyLarge(
               'Select Font',
             ),
             ListView.separated(
@@ -96,12 +62,12 @@ class _SelectFontBottomModalSheetState
                   const SizedBox(height: 8.0),
               itemBuilder: (BuildContext context, int index) {
                 final fontFamily = fontFamilies[index];
-                final isSelected = widget.selectedFontFamily == fontFamily;
+                final isSelected = selectedFontFamily == fontFamily;
 
                 final googleFont = GoogleFonts.getFont(
                   fontFamily,
                   textStyle: TextStyle(
-                    color: widget.selectedFontFamily == fontFamily
+                    color: selectedFontFamily == fontFamily
                         ? context.colors.primary
                         : null,
                   ),

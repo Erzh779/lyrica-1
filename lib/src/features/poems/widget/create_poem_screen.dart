@@ -7,7 +7,6 @@ import 'package:octopus/octopus.dart';
 import 'package:poem/src/core/extension/build_context.dart';
 import 'package:poem/src/core/utils/error_util.dart';
 import 'package:poem/src/core/widget/state_controller_processing_builder.dart';
-import 'package:poem/src/core/widget/ui_button.dart';
 import 'package:poem/src/core/widget/ui_text_field.dart';
 import 'package:poem/src/features/dependencies/widget/authenticated_dependencies_scope.dart';
 import 'package:poem/src/features/music/model/music.dart';
@@ -15,6 +14,7 @@ import 'package:poem/src/features/music/widget/background_music_screen.dart';
 import 'package:poem/src/features/music/widget/selected_music_widget.dart';
 import 'package:poem/src/features/poems/controller/create_poem_controller.dart';
 import 'package:poem/src/features/poems/model/create_poem_data.dart';
+import 'package:poem/src/features/poems/widget/create_poem_settings_bottom_modal_sheet.dart';
 import 'package:poem/src/features/poems/widget/select_font_bottom_modal_sheet.dart';
 
 /// {@template create_poem_screen}
@@ -43,7 +43,26 @@ class _CreatePoemScreenState extends State<CreatePoemScreen>
           child: Scaffold(
             appBar: AppBar(
               title: const Text('Create Poem'),
+              centerTitle: false,
               actions: [
+                StateControllerProcessingBuilder(
+                  stateController: _createPoemController,
+                  isProcessing: (state) => state.isProcessing,
+                  builder: (context, isProcessing) => IconButton(
+                    onPressed: isProcessing
+                        ? null
+                        : () => CreatePoemSettingsBottomModalSheet.show(
+                              context,
+                              onPressChangeCover: _onPressSelectImage,
+                              onPressChangeFontFamily: _onPressSelectFont,
+                              onPressChangeMusic: _onPressSelectMusic,
+                              onPressCheckPoem: () {},
+                            ),
+                    icon: const Icon(
+                      Icons.settings,
+                    ),
+                  ),
+                ),
                 StateControllerProcessingBuilder(
                   stateController: _createPoemController,
                   isProcessing: (state) => state.isProcessing,
@@ -108,7 +127,6 @@ class _CreatePoemScreenState extends State<CreatePoemScreen>
                           textAlignVertical: TextAlignVertical.top,
                           focusNode: _contentFocusNode,
                           controller: _contentController,
-                          onTapOutside: (event) => _contentFocusNode.unfocus(),
                           style: font,
                           decoration: const InputDecoration(
                             hintText: 'Enter your poem here...',
@@ -123,80 +141,58 @@ class _CreatePoemScreenState extends State<CreatePoemScreen>
                       },
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      spacing: 8.0,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          spacing: 8.0,
-                          children: [
-                            Expanded(
-                              child: ValueListenableBuilder(
-                                valueListenable: _music,
-                                builder: (context, music, _) {
-                                  if (music != null) {
-                                    return SelectedMusicWidget(
-                                      enabled: !isProcessing,
-                                      title: music.title,
-                                      url: music.url,
-                                      onRemovePressed: () =>
-                                          _music.value = null,
-                                      onMusicPressed: _onPressSelectMusic,
-                                    );
-                                  }
+                  ValueListenableBuilder(
+                    valueListenable: _music,
+                    builder: (context, music, _) {
+                      if (music != null) {
+                        return Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: SelectedMusicWidget(
+                            enabled: !isProcessing,
+                            title: music.title,
+                            url: music.url,
+                            onRemovePressed: () => _music.value = null,
+                            onMusicPressed: _onPressSelectMusic,
+                          ),
+                        );
+                      }
 
-                                  return UiButton.secondary(
-                                    enabled: !isProcessing,
-                                    onPressed: _onPressSelectMusic,
-                                    label: const Text(
-                                      'Select Music',
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            Expanded(
-                              child: ValueListenableBuilder(
-                                valueListenable: _image,
-                                builder: (context, image, _) =>
-                                    UiButton.secondary(
-                                  enabled: !isProcessing,
-                                  onPressed: _onPressSelectImage,
-                                  label: const Text(
-                                    'Select Cover',
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          spacing: 8.0,
-                          children: [
-                            Expanded(
-                              child: UiButton.secondary(
-                                onPressed: _onPressSelectFont,
-                                enabled: !isProcessing,
-                                label: const Text(
-                                  'Change Font',
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: UiButton.primary(
-                                onPressed: () {},
-                                enabled: !isProcessing,
-                                label: const Text(
-                                  'Auto Edit punctuation',
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      return SizedBox.shrink();
+                    },
+                  ),
+                  ListenableBuilder(
+                    listenable: Listenable.merge(
+                      [
+                        _titleFocusNode,
+                        _contentFocusNode,
                       ],
                     ),
+                    builder: (context, _) {
+                      final keyboardIsOpen = _titleFocusNode.hasFocus ||
+                          _contentFocusNode.hasFocus;
+                      if (!keyboardIsOpen) return const SizedBox.shrink();
+
+                      return SizedBox(
+                        height: 48.0,
+                        child: Ink(
+                          color: context.colors.surface,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  _titleFocusNode.unfocus();
+                                  _contentFocusNode.unfocus();
+                                },
+                                child: const Text(
+                                  'Done',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
