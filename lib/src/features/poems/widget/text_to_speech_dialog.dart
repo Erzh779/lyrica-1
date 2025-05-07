@@ -47,6 +47,7 @@ class TextToSpeechDialog extends StatefulWidget {
 class _TextToSpeechDialogState extends State<TextToSpeechDialog> {
   bool _isProcessing = false;
   bool _isPlaying = false;
+  bool _isCompleted = false;
 
   String? _errorMessage;
 
@@ -60,8 +61,8 @@ class _TextToSpeechDialogState extends State<TextToSpeechDialog> {
     try {
       final directory = await path_provider.getTemporaryDirectory();
 
-      final audioName = 'audio_${widget.id}.mp3';
-      final audioFile = File(path.join(directory.path, audioName));
+      final audioName = 'audio_${widget.id}';
+      final audioFile = File(path.join(directory.path, '$audioName.aac'));
 
       if (audioFile.existsSync()) {
         await _player.setFilePath(audioFile.path);
@@ -72,10 +73,10 @@ class _TextToSpeechDialogState extends State<TextToSpeechDialog> {
       final result = await OpenAI.instance.audio.createSpeech(
         input: widget.content,
         model: 'gpt-4o-mini-tts',
-        responseFormat: OpenAIAudioSpeechResponseFormat.mp3,
+        responseFormat: OpenAIAudioSpeechResponseFormat.aac,
         voice: 'nova',
         outputDirectory: directory,
-        outputFileName: path.basename(audioFile.path),
+        outputFileName: audioName,
       );
 
       await _player.setFilePath(result.path);
@@ -91,7 +92,7 @@ class _TextToSpeechDialogState extends State<TextToSpeechDialog> {
 
   late final AudioPlayer _player;
 
-  StreamSubscription<bool>? _isPlayingSubscription;
+  StreamSubscription<PlayerEvent>? _isPlayingSubscription;
 
   @override
   void setState(VoidCallback fn) {
@@ -106,13 +107,30 @@ class _TextToSpeechDialogState extends State<TextToSpeechDialog> {
     _player = AudioPlayer();
     _player.setLoopMode(LoopMode.off);
 
-    _isPlayingSubscription = _player.playingStream.listen(
-      (state) => setState(
-        () => _isPlaying = state,
-      ),
+    _isPlayingSubscription = _player.playerEventStream.listen(
+      (event) {
+        final isPlaying = event.playing;
+        if (isPlaying == _isPlaying) return;
+
+        setState(() => _isPlaying = event.playing);
+      },
       onDone: () {
         _isPlayingSubscription?.cancel();
         _isPlayingSubscription = null;
+      },
+    );
+
+    // listen when the audio is finished playing
+    _player.playerStateStream.listen(
+      (state) {
+        if (state.processingState == ProcessingState.completed) {
+          setState(
+            () {
+              _isPlaying = false;
+              _isCompleted = true;
+            },
+          );
+        }
       },
     );
 
@@ -134,21 +152,32 @@ class _TextToSpeechDialogState extends State<TextToSpeechDialog> {
   Widget build(BuildContext context) => AlertDialog(
         title: const Text('Text to Speech'),
         alignment: Alignment.center,
-        content: _isProcessing
-            ? const Center(
-                child: CircularProgressIndicator.adaptive(),
-              )
-            : _errorMessage != null
-                ? Text(_errorMessage!)
-                : Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ElevatedButton(
-                        onPressed: _isPlaying ? _player.pause : _player.play,
-                        child: Text(_isPlaying ? 'Pause' : 'Play'),
+        content: SizedBox(
+          height: 240,
+          child: Center(
+            child: _isProcessing
+                ? CircularProgressIndicator.adaptive()
+                : _errorMessage != null
+                    ? Text(_errorMessage!)
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ElevatedButton(
+                            onPressed: _isPlaying
+                                ? _player.pause
+                                : () {
+                                    if (_isCompleted) {
+                                      _player.seek(Duration.zero);
+                                      _isCompleted = false;
+                                    }
+                                    _player.play();
+                                  },
+                            child: Text(_isPlaying ? 'Pause' : 'Play'),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
