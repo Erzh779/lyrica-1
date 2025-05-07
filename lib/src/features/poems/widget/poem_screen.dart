@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -64,12 +61,9 @@ class _PoemScreenState extends State<PoemScreen> with _PoemScreenStateMixin {
                   padding: const EdgeInsets.all(
                     16.0,
                   ),
-                  child: ValueListenableBuilder(
-                    valueListenable: _isPlaying,
-                    builder: (context, isPlaying, child) => SelectedMusicWidget(
-                      title: widget.poem.music!.title,
-                      url: widget.poem.music!.url,
-                    ),
+                  child: SelectedMusicWidget(
+                    title: widget.poem.music!.title,
+                    url: widget.poem.music!.url,
                   ),
                 ),
             ],
@@ -79,54 +73,13 @@ class _PoemScreenState extends State<PoemScreen> with _PoemScreenStateMixin {
 }
 
 mixin _PoemScreenStateMixin on State<PoemScreen> {
-  late final AudioPlayer _audioPlayer;
-
-  final ValueNotifier<bool> _isPlaying = ValueNotifier(false);
-
-  StreamSubscription<AudioEvent>? _audioPlayerSubscription;
-
   @override
   void initState() {
-    _audioPlayer = AudioPlayer();
-
-    if (widget.poem.music != null) {
-      _audioPlayer.setSourceUrl(widget.poem.music!.url);
-      _audioPlayer.setReleaseMode(ReleaseMode.loop);
-    }
-
-    _audioPlayerSubscription = _audioPlayer.eventStream.listen(
-      (event) {
-        if (event.eventType == AudioEventType.complete) {
-          _isPlaying.value = false;
-        }
-      },
-    );
-
     super.initState();
   }
 
   @override
   void dispose() {
-    _audioPlayerSubscription?.cancel();
-
-    _audioPlayer.dispose();
-
     super.dispose();
-  }
-
-  void _onPlayPausePressed() {
-    if (_isPlaying.value) {
-      _audioPlayer.pause().then((_) {
-        if (!mounted) return;
-        _isPlaying.value = false;
-      });
-    } else {
-      _audioPlayer.resume().then((_) {
-        if (!mounted) return;
-        _isPlaying.value = true;
-      });
-    }
-
-    _isPlaying.value = !_isPlaying.value;
   }
 }

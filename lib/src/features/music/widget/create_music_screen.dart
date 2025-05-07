@@ -29,8 +29,7 @@ class CreateMusicScreen extends StatefulWidget {
 }
 
 /// State for widget CreateMusicScreen.
-class _CreateMusicScreenState extends State<CreateMusicScreen>
-    with _CreateMusicScreenStateMixin {
+class _CreateMusicScreenState extends State<CreateMusicScreen> with _CreateMusicScreenStateMixin {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
@@ -77,9 +76,11 @@ class _CreateMusicScreenState extends State<CreateMusicScreen>
                             return UiButton.secondary(
                               enabled: !isProcessing,
                               onPressed: () async {
-                                final result =
-                                    await FilePicker.platform.pickFiles(
-                                  type: FileType.audio,
+                                final result = await FilePicker.platform.pickFiles(
+                                  type: FileType.custom,
+                                  allowedExtensions: [
+                                    'mp3',
+                                  ],
                                 );
 
                                 if (!mounted) return;
@@ -99,8 +100,7 @@ class _CreateMusicScreenState extends State<CreateMusicScreen>
                         StateConsumer<GenresController, GenresState>(
                           controller: _genresController,
                           builder: (context, state, child) {
-                            final enabled =
-                                !state.isProcessing && !isProcessing;
+                            final enabled = !state.isProcessing && !isProcessing;
 
                             final genres = state.genres;
 
@@ -110,14 +110,12 @@ class _CreateMusicScreenState extends State<CreateMusicScreen>
                                 Expanded(
                                   child: UiText.bodyMedium(
                                     'Genre',
-                                    color:
-                                        enabled ? null : context.colors.gray500,
+                                    color: enabled ? null : context.colors.gray500,
                                   ),
                                 ),
                                 ValueListenableBuilder(
                                   valueListenable: _genre,
-                                  builder: (context, genre, _) =>
-                                      DropdownButtonHideUnderline(
+                                  builder: (context, genre, _) => DropdownButtonHideUnderline(
                                     child: DropdownButton<Genre>(
                                       value: genre,
                                       items: genres
@@ -125,8 +123,7 @@ class _CreateMusicScreenState extends State<CreateMusicScreen>
                                             (genre) => DropdownMenuItem<Genre>(
                                               value: genre,
                                               child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
+                                                padding: const EdgeInsets.all(8.0),
                                                 child: UiText.bodyMedium(
                                                   genre.displayName,
                                                 ),
@@ -134,9 +131,7 @@ class _CreateMusicScreenState extends State<CreateMusicScreen>
                                             ),
                                           )
                                           .toList(),
-                                      onChanged: enabled
-                                          ? (genre) => _genre.value = genre
-                                          : null,
+                                      onChanged: enabled ? (genre) => _genre.value = genre : null,
                                       borderRadius: BorderRadius.circular(
                                         12.0,
                                       ),
@@ -185,8 +180,7 @@ mixin _CreateMusicScreenStateMixin on State<CreateMusicScreen> {
     if (state.isSucceeded) {
       final music = state.music!;
 
-      final musicListController =
-          AuthenticatedDependenciesScope.of(context).musicListController;
+      final musicListController = AuthenticatedDependenciesScope.of(context).musicListController;
 
       musicListController.addMusic(music);
       Navigator.pop(context, music);

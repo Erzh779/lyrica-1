@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:poem/src/core/extension/build_context.dart';
 import 'package:poem/src/core/widget/ui_text.dart';
 
@@ -49,43 +49,33 @@ class SelectedMusicWidget extends StatefulWidget {
 class _SelectedMusicWidgetState extends State<SelectedMusicWidget> {
   late final AudioPlayer _audioPlayer;
 
-  StreamSubscription<AudioEvent>? _audioPlayerSubscription;
+  StreamSubscription<bool>? _audioPlayerSubscription;
 
   final ValueNotifier<bool> _isPlaying = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _canPlay = ValueNotifier<bool>(false);
 
-  void _setSource() {
+  Future<void> _setSource() async {
+    _canPlay.value = false;
+
     if (widget.path != null) {
-      _audioPlayer.setSourceDeviceFile(widget.path!);
-      _audioPlayer.setReleaseMode(ReleaseMode.stop);
+      await _audioPlayer.setFilePath(widget.path!);
     } else if (widget.url != null) {
-      _audioPlayer.setSourceUrl(widget.url!);
-      _audioPlayer.setReleaseMode(ReleaseMode.stop);
+      await _audioPlayer.setUrl(widget.url!);
     }
+
+    _canPlay.value = true;
   }
 
   void _onPlayerEvent(
-    AudioEvent event,
-  ) {
-    if (event.eventType == AudioEventType.complete) _isPlaying.value = false;
-  }
+    bool isPlaying,
+  ) =>
+      _isPlaying.value = isPlaying;
 
   void _onPlayPausePressed() {
     if (_isPlaying.value) {
-      _audioPlayer.pause().then(
-        (_) {
-          if (!mounted) return;
-
-          _isPlaying.value = false;
-        },
-      );
+      _audioPlayer.pause();
     } else {
-      _audioPlayer.resume().then(
-        (_) {
-          if (!mounted) return;
-
-          _isPlaying.value = true;
-        },
-      );
+      _audioPlayer.play();
     }
   }
 
@@ -95,10 +85,21 @@ class _SelectedMusicWidgetState extends State<SelectedMusicWidget> {
     super.initState();
 
     _audioPlayer = AudioPlayer();
-    _setSource();
+    _audioPlayer.setLoopMode(LoopMode.off);
 
-    _audioPlayerSubscription = _audioPlayer.eventStream.listen(
+    _audioPlayerSubscription = _audioPlayer.playingStream.listen(
       _onPlayerEvent,
+      onDone: () {
+        _audioPlayerSubscription?.cancel();
+        _audioPlayerSubscription = null;
+      },
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) async {
+        if (!mounted) return;
+        await _setSource();
+      },
     );
   }
 
